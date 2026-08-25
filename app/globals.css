@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Lillehammer Restaurant & Bar — design tokens
+   Every colour below is sampled from the restaurant's own photos
+   and logo, not chosen from a generic palette.
+   --------------------------------------------------------------- */
+@theme {
+  /* Sampled: logo mark */
+  --color-ember: #e81820;
+  --color-ember-deep: #8c0f16;
+
+  /* Sampled: interior at night / logo lockup background */
+  --color-ink: #080808;
+  --color-carbon: #231f20;
+  --color-soot: #100e0e;
+
+  /* Sampled: the house ceramic plate (lit rim / shadowed well) */
+  --color-sage: #90a8a0;
+  --color-petrol: #204050;
+  --color-petrol-deep: #132631;
+
+  /* Sampled: Edison bulbs, cocktails, fried surfaces */
+  --color-amber: #d86800;
+  --color-bone: #dcceb8;
+  --color-ash: #8a8f92;
+
+  --font-display: var(--font-archivo), "Arial Narrow", sans-serif;
+  --font-body: var(--font-instrument), system-ui, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, monospace;
+
+  --radius-none: 0px;
+
+  --text-mega: clamp(3.5rem, 14vw, 13rem);
+  --text-huge: clamp(2.5rem, 7vw, 6rem);
+}
+
+/* ---------------------------------------------------------------
+   HEAT: the whole site is themed by the real clock in Lillehammer.
+   cold = kitchen closed. warm = kitchen open.
+   Set on <html> by an inline script before paint (see layout.tsx).
+   --------------------------------------------------------------- */
+:root,
+[data-heat="cold"] {
+  --surface: var(--color-petrol-deep);
+  --surface-2: #0d1b23;
+  --edge: #24404e;
+  --fg: #9fb3bb;
+  --fg-strong: #e4eef1;
+  --accent: var(--color-sage);
+  --glow: 0 0 0 rgba(0, 0, 0, 0);
+  --photo-filter: saturate(0.45) contrast(1.05) brightness(0.82);
+  --ease-house: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 1100ms;
+  --dur-fast: 620ms;
+}
+
+[data-heat="warm"] {
+  --surface: var(--color-ink);
+  --surface-2: var(--color-carbon);
+  --edge: #3a2f2b;
+  --fg: #b9ada0;
+  --fg-strong: #f4ece0;
+  --accent: var(--color-ember);
+  --glow: 0 0 120px -20px rgba(216, 104, 0, 0.55);
+  --photo-filter: saturate(1.06) contrast(1.02) brightness(1);
+  --ease-house: cubic-bezier(0.2, 0.9, 0.1, 1);
+  --dur: 380ms;
+  --dur-fast: 180ms;
+}
+
+@layer base {
+  * {
+    border-radius: 0;
+  }
+
+  html {
+    background-color: var(--surface);
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-feature-settings: "ss01", "cv01";
+    /* No transition here on purpose. Chrome will not advance a transition
+       whose value comes from a custom property that changed, so a themed
+       `background-color: var(--surface)` stays pinned to the old colour.
+       The temperature is resolved before first paint by the boot script,
+       so there is nothing to cross-fade on load anyway; the manual override
+       animates a real overlay element in JS instead. */
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--surface);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  img {
+    filter: var(--photo-filter);
+  }
+}
+
+@utility hairline-t {
+  border-top: 1px solid var(--edge);
+}
+@utility hairline-b {
+  border-bottom: 1px solid var(--edge);
+}
+@utility hairline-r {
+  border-right: 1px solid var(--edge);
+}
+
+/* Display type: Archivo's width axis is used deliberately —
+   condensed for dish names (they must nest), expanded for numerals. */
+@utility type-condensed {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 68;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+@utility type-expanded {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 118;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+
+/* The house LED sign. Dot-matrix, not a glow-blur cliché. */
+@utility led {
+  font-family: var(--font-mono);
+  font-variation-settings: "wdth" 87.5;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+@keyframes pilot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.28; }
+}
+@utility pilot-light {
+  animation: pilot 2.4s var(--ease-house) infinite;
+}
+
+/* The room breathing: a very slow luminance drift on the interior
+   plate, so the hero is never a dead picture box. */
+@keyframes breathe {
+  0%, 100% { transform: scale(1.04) translate3d(0, 0, 0); opacity: 0.88; }
+  50% { transform: scale(1.09) translate3d(0, -1.2%, 0); opacity: 1; }
+}
+@utility breathing {
+  animation: breathe 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
