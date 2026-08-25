@@ -268,16 +268,48 @@ over real photographs, never invented food.
 
 ---
 
-## 5. Decisions still needed
+## 5. Source material and open items
 
-1. **Booking.** Is there a provider (Favrit, Superb, DineOut, OpenTable) or
-   is it phone only? The receipt flow posts to the Worker either way, but if
-   a provider exists the flow should hand off to it rather than compete.
-2. **Takeaway.** Own flow, Foodora, Wolt, or phone.
-3. **Menu data.** Dishes and prices, ideally as a list. Nothing is invented.
-4. **Photo to dish mapping.** The 51 photos are unlabelled. Someone who
-   knows the menu needs to name them, or the Pass ships with categories only.
-5. **Reviews.** Real Google or Facebook reviews with real first names and
-   dates, or the section does not exist.
-6. **Video.** Whether anything will be filmed in the room. If not, the loops
-   are dropped rather than generated.
+### Resolved
+
+**Menu.** Transcribed verbatim from `LRB_Meny_2026-003.pdf`, found behind the
+PDF viewer on `/se-var-meny/` and kept in `content/source/`. 108 dishes across
+15 sections, in `content/menu.ts`. Real dish numbers, real allergen marks,
+real prices, the restaurant's own spelling left intact.
+
+**The numbers are the system.** The menu is numbered 1, 2, 3, 6, 7, 8, 11 and
+on up to 202, non-contiguously, because dishes have come and gone since 2003.
+People in Lillehammer order by number. Those numbers are the single strongest
+piece of brand equity the restaurant already owns and has never designed
+around, so they get their own rail, set in ember.
+
+**Reviews.** 4.4 from 953 Google reviews, shown as a dot-matrix bar linking to
+the reviews themselves. No testimonial is invented and no quote is
+reproduced. Not emitted as `aggregateRating` in the structured data, because a
+business rating itself on its own site is self-serving markup and is not
+eligible for rich results.
+
+**Ordering.** They already run **GetFood** for table booking
+(`getfood.no/lillehammerrestaurant/bord`) and takeaway
+(`.../menu/578`), and **Delivia** for delivery. All three are wired in
+`lib/links.ts` behind `ORDERING_LIVE`, currently `false`. The receipt flow
+stays a placeholder that ends on the phone number until that flag flips.
+
+**Video.** None exists, so the Higgsfield loops are cut rather than generated.
+Motion in the Room section comes from parallax and slow luminance drift on the
+real photographs instead.
+
+**People.** Head chef is Haval Ibrahim. Worth one honest line in the Room
+section, not a founder-story block.
+
+### Still open
+
+1. **Photo to dish mapping.** The 51 photographs are unlabelled and there is
+   no mapping anywhere. Passet is blocked on this. A rough pass is enough:
+   even "these six are pizza, these nine are the Turkish plates" unlocks it.
+   Nothing gets a dish name it cannot prove.
+2. **Which dishes are actually the ones to sell.** 108 dishes is too many to
+   lead with. Five or six that the kitchen is proud of would carry the Pass.
+3. **Whether the receipt flow should exist at all** once GetFood is live, or
+   whether the booking button should simply hand off. Building both and
+   picking later is wasted work.
