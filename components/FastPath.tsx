@@ -18,15 +18,15 @@ export function FastPath() {
     heat === "warm"
       ? toClose !== null && toClose <= 60
         ? `Stenger om ${humanGap(toClose)}`
-        : `Åpent til ${String(Math.floor(HOURS[day].close / 60)).padStart(2, "0")}.00`
+        : `Åpent til ${hhmm(HOURS[day].close)}`
       : toOpen !== null && toOpen <= 90
-        ? `Åpner om ${humanGap(toOpen)}`
+        ? `Åpner ${humanGap(toOpen)}`
         : `Åpner ${hhmm((minutes + (toOpen ?? 0)) % 1440)}`;
 
   return (
     <nav
       aria-label="Snarveier"
-      className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-[1fr_auto_auto] items-stretch md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-[1fr_auto_auto_auto] items-stretch md:hidden"
       style={{
         background: "var(--surface-2)",
         borderTop: "1px solid var(--edge)",
@@ -34,7 +34,7 @@ export function FastPath() {
       }}
     >
       <span
-        className="led flex items-center gap-2 px-4 py-4"
+        className="label flex items-center gap-2 px-3 py-4"
         style={{ color: "var(--fg)" }}
       >
         <span
@@ -46,15 +46,22 @@ export function FastPath() {
       </span>
 
       <a
+        href="#meny"
+        className="label flex items-center px-4"
+        style={{ borderLeft: "1px solid var(--edge)", color: "var(--fg-strong)" }}
+      >
+        Meny
+      </a>
+      <a
         href="#bestill"
-        className="led hairline-r flex items-center px-5"
+        className="label flex items-center px-4"
         style={{ borderLeft: "1px solid var(--edge)", color: "var(--fg-strong)" }}
       >
         Bord
       </a>
       <a
         href="tel:+4761259060"
-        className="led flex items-center px-5"
+        className="label flex items-center px-4"
         style={{ background: "var(--accent)", color: "var(--surface)" }}
       >
         Ring

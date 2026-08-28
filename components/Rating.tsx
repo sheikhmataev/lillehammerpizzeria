@@ -20,7 +20,7 @@ export function Rating() {
       href={LINKS.maps}
       target="_blank"
       rel="noopener noreferrer"
-      className="hairline-t hairline-b group flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-5 md:px-8"
+      className="group flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-5 md:px-8"
     >
       <span
         className="type-expanded text-3xl tabular-nums md:text-4xl"
@@ -41,12 +41,12 @@ export function Rating() {
         ))}
       </span>
 
-      <span className="led" style={{ color: "var(--fg)" }}>
+      <span className="label" style={{ color: "var(--fg)" }}>
         {GOOGLE.count} anmeldelser på Google
       </span>
 
       <span
-        className="led ml-auto"
+        className="label ml-auto"
         style={{ color: "var(--fg-strong)" }}
       >
         Les dem <span className="group-hover:pl-1 inline-block transition-[padding]">&rarr;</span>

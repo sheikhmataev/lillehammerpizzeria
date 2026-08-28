@@ -35,11 +35,11 @@ function Price({ dish }: { dish: Dish }) {
 function Row({ dish }: { dish: Dish }) {
   return (
     <li
-      className="grid grid-cols-[2.75rem_1fr] gap-x-3 py-3"
-      style={{ borderTop: "1px solid var(--edge)" }}
+      className="grid grid-cols-[2.9rem_1fr] gap-x-3 py-4"
+      style={{ borderTop: "1px solid var(--edge-soft)" }}
     >
       <span
-        className="led pt-[3px] tabular-nums"
+        className="led pt-1.5 text-[0.9rem]"
         style={{ color: dish.no ? "var(--accent)" : "transparent" }}
       >
         {dish.no ?? "—"}
@@ -48,41 +48,46 @@ function Row({ dish }: { dish: Dish }) {
       <div className="min-w-0">
         <div className="flex items-baseline justify-between gap-4">
           <h3
-            className="type-condensed text-[1.35rem] md:text-2xl"
+            className="type-condensed text-[1.4rem] md:text-[1.6rem]"
             style={{ color: "var(--fg-strong)" }}
           >
             {dish.name}
             {dish.spicy && (
               <span
-                className="led ml-2 align-middle"
+                className="label ml-2 align-middle text-[0.7rem]"
                 style={{ color: "var(--accent)" }}
-                title="Sterk"
               >
-                sterk
+                Sterk
               </span>
             )}
             {dish.vegan && (
               <span
-                className="led ml-2 align-middle"
+                className="label ml-2 align-middle text-[0.7rem]"
                 style={{ color: "var(--color-sage)" }}
               >
-                vegan
+                Vegan
               </span>
             )}
           </h3>
-          <span className="led" style={{ color: "var(--fg-strong)" }}>
+          <span className="led text-[0.95rem]" style={{ color: "var(--fg-strong)" }}>
             <Price dish={dish} />
           </span>
         </div>
 
         {dish.desc && (
-          <p className="mt-1 max-w-[52ch] text-[0.92rem] leading-snug">
+          <p
+            className="mt-1.5 max-w-[52ch] text-[0.98rem] leading-snug"
+            style={{ color: "var(--fg)" }}
+          >
             {dish.desc}
           </p>
         )}
 
         {dish.allergens && (
-          <p className="led mt-1.5" style={{ color: "var(--fg)", opacity: 0.62 }}>
+          <p
+            className="label mt-2 text-[0.7rem]"
+            style={{ color: "var(--fg-mute)" }}
+          >
             {dish.allergens.join(" · ")}
           </p>
         )}
@@ -96,13 +101,13 @@ function Block({ section }: { section: Section }) {
     <section id={section.id} className="scroll-mt-24 pt-14 first:pt-0">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 pb-1">
         <h2
-          className="type-expanded text-3xl md:text-4xl"
+          className="type-expanded text-[1.9rem] md:text-[2.25rem]"
           style={{ color: "var(--fg-strong)" }}
         >
           {section.title}
         </h2>
         {section.sizeHeadings && (
-          <span className="led flex gap-4" style={{ color: "var(--fg)" }}>
+          <span className="label flex gap-4 text-[0.7rem]" style={{ color: "var(--fg-mute)" }}>
             {section.sizeHeadings.map((h) => (
               <span key={h} className="w-14 text-right">
                 {h}
@@ -114,8 +119,8 @@ function Block({ section }: { section: Section }) {
 
       {section.note && (
         <p
-          className="max-w-[64ch] pb-3 text-[0.86rem] leading-snug"
-          style={{ color: "var(--fg)", opacity: 0.72 }}
+          className="max-w-[62ch] pb-3 text-[0.95rem] leading-snug"
+          style={{ color: "var(--fg-mute)" }}
         >
           {section.note}
         </p>
@@ -129,13 +134,13 @@ function Block({ section }: { section: Section }) {
 
       {section.extras && (
         <dl
-          className="led mt-5 grid grid-cols-[1fr_auto] gap-x-8 gap-y-1.5 p-4"
-          style={{ border: "1px solid var(--edge)", color: "var(--fg)" }}
+          className="mt-6 grid grid-cols-[1fr_auto] gap-x-8 gap-y-2 p-4 text-[0.95rem]"
+          style={{ border: "1px solid var(--edge)", color: "var(--fg-mute)" }}
         >
           {section.extras.map((e) => (
             <div key={e.label} className="contents">
               <dt>{e.label}</dt>
-              <dd className="text-right tabular-nums" style={{ color: "var(--fg-strong)" }}>
+              <dd className="led text-right text-[0.95rem]" style={{ color: "var(--fg-strong)" }}>
                 {e.price}
               </dd>
             </div>
@@ -160,23 +165,23 @@ export function Menu() {
   const shown = sections.reduce((n, s) => n + s.dishes.length, 0);
 
   return (
-    <div id="meny" className="px-5 pb-24 pt-6 md:px-8 md:pt-14">
+    <div id="meny" className="hairline-t scroll-mt-20 px-4 pb-20 pt-6 md:px-8 md:pt-14">
       <div
-        className="sticky top-0 z-30 -mx-5 mb-8 flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-3 md:-mx-8 md:px-8"
+        className="sticky top-[3.6rem] z-30 -mx-4 mb-10 flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3.5 md:-mx-8 md:px-8"
         style={{
           background: "var(--surface)",
-          borderBottom: "1px solid var(--edge)",
+          borderBottom: "1px solid var(--edge-soft)",
         }}
       >
         <label className="flex min-w-[13rem] flex-1 items-center gap-3">
-          <span className="led shrink-0" style={{ color: "var(--fg)" }}>
+          <span className="label shrink-0" style={{ color: "var(--fg-mute)" }}>
             Søk
           </span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="kebab, 25, vegan"
-            className="led w-full bg-transparent py-1 outline-none"
+            className="w-full bg-transparent py-1.5 text-[1rem] outline-none"
             style={{
               color: "var(--fg-strong)",
               borderBottom: "1px solid var(--edge)",
@@ -184,12 +189,12 @@ export function Menu() {
           />
         </label>
 
-        <span className="led tabular-nums" style={{ color: "var(--fg)" }}>
+        <span className="led" style={{ color: "var(--fg-mute)" }}>
           {shown} av {DISH_COUNT}
         </span>
 
         <nav
-          className="led -mb-1 flex w-full gap-5 overflow-x-auto pb-1"
+          className="label -mb-1 flex w-full gap-6 overflow-x-auto pb-1"
           style={{ scrollbarWidth: "none" }}
           aria-label="Kategorier"
         >
@@ -198,7 +203,7 @@ export function Menu() {
               key={s.id}
               href={`#${s.id}`}
               className="shrink-0 whitespace-nowrap"
-              style={{ color: "var(--fg)" }}
+              style={{ color: "var(--fg-mute)" }}
             >
               {s.title}
             </a>
@@ -207,7 +212,7 @@ export function Menu() {
       </div>
 
       {sections.length === 0 ? (
-        <p className="led py-16" style={{ color: "var(--fg)" }}>
+        <p className="label py-16" style={{ color: "var(--fg-mute)" }}>
           Ingenting het det. Prøv «kebab» eller et nummer.
         </p>
       ) : (
