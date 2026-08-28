@@ -1,4 +1,6 @@
 import { FAVORITES } from "@/content/favorites";
+import { asset } from "@/lib/asset";
+import { Reveal } from "@/components/Reveal";
 
 /**
  * A board, not a carousel. Nothing here has to be operated to be read: five
@@ -15,7 +17,7 @@ export function Favorites() {
             Husets fem
           </h2>
           <a
-            href="/meny/"
+            href={asset("/meny/")}
             className="tag underline underline-offset-4"
             style={{ color: "var(--mark)" }}
           >
@@ -24,11 +26,12 @@ export function Favorites() {
         </div>
 
         <ul className="mt-10">
-          {FAVORITES.map((d) => (
-            <li
+          {FAVORITES.map((d, i) => (
+            <Reveal
+              as="li"
               key={d.no}
-              className="grid grid-cols-[auto_1fr] items-baseline gap-x-5 gap-y-2 py-7 md:grid-cols-[6rem_1fr_auto] md:gap-x-8"
-              style={{ borderTop: "1px solid var(--rule)" }}
+              index={i}
+              className="grid grid-cols-[auto_1fr] items-baseline gap-x-5 gap-y-2 border-t border-t-[var(--rule)] py-7 md:grid-cols-[6rem_1fr_auto] md:gap-x-8"
             >
               <span
                 className="figure-num text-4xl md:text-6xl"
@@ -53,7 +56,7 @@ export function Favorites() {
               >
                 {d.price},&ndash;
               </span>
-            </li>
+            </Reveal>
           ))}
         </ul>
       </div>

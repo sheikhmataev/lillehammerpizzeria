@@ -1,4 +1,7 @@
 import { Motif } from "@/components/Motif";
+import { Reveal } from "@/components/Reveal";
+import { BigNumber } from "@/components/BigNumber";
+import { asset } from "@/lib/asset";
 
 const GROUPS = ["Student", "Helsevesen", "Brannvesen", "Forsvaret", "Politiet"];
 
@@ -12,7 +15,7 @@ export function Discounts() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
-        style={{ backgroundImage: "url(/paper.webp)", backgroundSize: "460px 460px" }}
+        style={{ backgroundImage: `url(${asset("/paper.webp")})`, backgroundSize: "460px 460px" }}
       />
       <Motif
         name="skewer"
@@ -21,12 +24,7 @@ export function Discounts() {
       />
 
       <div className="mx-auto grid max-w-[76rem] items-center gap-8 md:grid-cols-[auto_1fr] md:gap-16">
-        <p
-          className="figure-num leading-[0.8]"
-          style={{ color: "var(--fg-strong)", fontSize: "clamp(6rem, 22vw, 15rem)" }}
-        >
-          20<span style={{ fontSize: "0.42em" }}>%</span>
-        </p>
+        <BigNumber />
 
         <div className="flex flex-col gap-6">
           <h2 className="display-lg" style={{ color: "var(--fg-strong)" }}>
@@ -34,14 +32,16 @@ export function Discounts() {
           </h2>
 
           <ul className="flex flex-wrap gap-2.5">
-            {GROUPS.map((g) => (
-              <li
+            {GROUPS.map((g, i) => (
+              <Reveal
+                as="li"
                 key={g}
-                className="sign px-4 py-2.5 text-lg md:text-xl"
-                style={{ border: "1.5px solid var(--fg-strong)", color: "var(--fg-strong)" }}
+                index={i}
+                y={10}
+                className="sign border-[1.5px] border-[var(--fg-strong)] px-4 py-2.5 text-lg text-[var(--fg-strong)] md:text-xl"
               >
                 {g}
-              </li>
+              </Reveal>
             ))}
           </ul>
 

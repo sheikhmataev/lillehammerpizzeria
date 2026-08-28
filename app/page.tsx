@@ -1,7 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
 import { Favorites } from "@/components/Favorites";
-import { PhotoRail } from "@/components/PhotoRail";
+import { Pass } from "@/components/Pass";
 import { Room } from "@/components/Room";
 import { Discounts } from "@/components/Discounts";
 import { Contact } from "@/components/Contact";
@@ -14,7 +14,7 @@ export default function Home() {
       <main>
         <Hero />
         <Favorites />
-        <PhotoRail />
+        <Pass />
         <Room />
         <Discounts />
         <Contact />

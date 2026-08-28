@@ -1,27 +1,30 @@
+import Script from "next/script";
+import { asset } from "@/lib/asset";
+
 /**
- * Agency credit. mashpartners.no blocks automated fetching, so this is a plain
- * text byline rather than their official embed. If there is a supplied snippet
- * or wordmark, swap it in here and nothing else changes.
+ * Mash Partners' own credit badge, a Shadow DOM custom element. The script is
+ * served from this site rather than mashpartners.no so a third-party outage or
+ * block cannot silently remove the credit; point `src` at
+ * https://mashpartners.no/embed/mash-credit.js to track their copy instead.
+ *
+ * The badge takes all of its colour from `currentColor`, so setting --fg here
+ * is the whole integration: the eyebrow and hairlines derive from it, and the
+ * coral and cobalt inks only appear on hover.
+
  */
 export function MashCredit() {
   return (
-    <a
-      href="https://mashpartners.no"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group inline-flex items-baseline gap-2"
-    >
-      <span className="tag" style={{ color: "var(--fg-mute)" }}>
-        Nettsted av
-      </span>
-      <span
-        className="sign text-base transition-colors"
-        style={{ color: "var(--fg-mute)" }}
-      >
-        <span className="group-hover:text-[var(--fg-strong)] group-focus-visible:text-[var(--fg-strong)]">
-          Mash Partners
-        </span>
-      </span>
-    </a>
+    <>
+      <Script src={asset("/embed/mash-credit.js")} strategy="afterInteractive" />
+      <mash-credit
+        variant="minimal"
+        lang="nb"
+        services=""
+        location=""
+        org=""
+        className="max-w-full"
+        style={{ color: "var(--fg)" }}
+      />
+    </>
   );
 }

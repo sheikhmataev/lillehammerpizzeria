@@ -189,10 +189,21 @@
   mask-size: contain;
 }
 
+/* The three frames are reached through custom properties rather than written
+   into the keyframes directly. CSS cannot read NEXT_PUBLIC_BASE_PATH, and a
+   relative URL would be resolved by the bundler at build time, so this is the
+   only hook a GitHub Pages project path can override at runtime. Everything
+   else on the site builds its URLs in JS through lib/asset. */
+:root {
+  --flame-1: url("/motifs/flame-1.svg");
+  --flame-2: url("/motifs/flame-2.svg");
+  --flame-3: url("/motifs/flame-3.svg");
+}
+
 @keyframes flicker {
-  0%, 32%   { mask-image: url("/motifs/flame-1.svg"); -webkit-mask-image: url("/motifs/flame-1.svg"); }
-  33%, 65%  { mask-image: url("/motifs/flame-3.svg"); -webkit-mask-image: url("/motifs/flame-3.svg"); }
-  66%, 100% { mask-image: url("/motifs/flame-2.svg"); -webkit-mask-image: url("/motifs/flame-2.svg"); }
+  0%, 32%   { mask-image: var(--flame-1); -webkit-mask-image: var(--flame-1); }
+  33%, 65%  { mask-image: var(--flame-3); -webkit-mask-image: var(--flame-3); }
+  66%, 100% { mask-image: var(--flame-2); -webkit-mask-image: var(--flame-2); }
 }
 
 /* Three drawn frames cycled on a deliberately uneven beat, so it reads as a
@@ -216,16 +227,8 @@
     transition-duration: 0.001ms !important;
   }
   .flame {
-    mask-image: url("/motifs/flame-2.svg");
-    -webkit-mask-image: url("/motifs/flame-2.svg");
+    mask-image: var(--flame-2);
+    -webkit-mask-image: var(--flame-2);
   }
 }
 
-/* The photo rail runs on its own. Duplicated content means the reset at 50%
-   is invisible; hovering pauses it so a photograph can be looked at. */
-@keyframes rail {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-}
-.rail-track:hover,
-.rail-track:focus-within { animation-play-state: paused; }

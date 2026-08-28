@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Vollkorn } from "next/font/google";
 import { HeatProvider } from "@/components/HeatProvider";
 import { HEAT_BOOT } from "@/components/heat-boot";
+import { BASE } from "@/lib/asset";
 import { FastPath } from "@/components/FastPath";
 import "./globals.css";
 
@@ -106,6 +107,15 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(RESTAURANT_LD) }}
         />
+        {/* The only asset URLs that live in CSS. Emitted only when the site is
+            served from a sub-path, which is the GitHub Pages project case. */}
+        {BASE ? (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `:root{--flame-1:url("${BASE}/motifs/flame-1.svg");--flame-2:url("${BASE}/motifs/flame-2.svg");--flame-3:url("${BASE}/motifs/flame-3.svg")}`,
+            }}
+          />
+        ) : null}
       </head>
       <body className="antialiased">
         <HeatProvider>

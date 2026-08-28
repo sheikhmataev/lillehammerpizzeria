@@ -1,3 +1,5 @@
+import { asset } from "@/lib/asset";
+
 /**
  * The real lockup, lifted at vector resolution out of the 2026 print menu
  * and keyed onto transparency, so it is the restaurant's actual mark rather
@@ -18,8 +20,8 @@ export function Logo({
   const width = Math.round(height * 2.2231);
   return (
     <img
-      src="/logo@600.webp"
-      srcSet="/logo@600.webp 600w, /logo.webp 1200w"
+      src={asset("/logo@600.webp")}
+      srcSet={`${asset("/logo@600.webp")} 600w, ${asset("/logo.webp")} 1200w`}
       sizes={fluid ? "(min-width: 768px) 30rem, 80vw" : `${width}px`}
       alt="Lillehammer Restaurant & Bar, etablert 2003"
       width={width}

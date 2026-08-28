@@ -3,6 +3,7 @@
 import { useHeat } from "@/components/HeatProvider";
 import { HOURS, humanGap } from "@/lib/hours";
 import { LINKS } from "@/lib/links";
+import { asset } from "@/lib/asset";
 
 const hhmm = (m: number) =>
   `${String(Math.floor(m / 60)).padStart(2, "0")}.${String(m % 60).padStart(2, "0")}`;
@@ -44,7 +45,7 @@ export function FastPath() {
       </span>
 
       <a
-        href="/meny/"
+        href={asset("/meny/")}
         className="tag flex items-center px-5"
         style={{ borderLeft: "1px solid var(--color-soot)", color: "var(--color-chalk)" }}
       >

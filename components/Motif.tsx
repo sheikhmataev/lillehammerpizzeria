@@ -1,3 +1,5 @@
+import { asset } from "@/lib/asset";
+
 /**
  * The drawn marks are used as CSS masks rather than inline SVG, so one file
  * recolours itself against red, ink or chalk without a second asset and
@@ -25,7 +27,7 @@ export function Motif({
   /** Only meaningful for the flame: cycles three drawn frames. */
   animated?: boolean;
 }) {
-  const url = `url("${FILE[name]}")`;
+  const url = `url("${asset(FILE[name])}")`;
   return (
     <span
       aria-hidden
