@@ -4,7 +4,6 @@ import { useHeat } from "@/components/HeatProvider";
 import { useEntrance } from "@/lib/use-entrance";
 import { Motif } from "@/components/Motif";
 import { HOURS, DAY_NO } from "@/lib/hours";
-import { LINKS } from "@/lib/links";
 import { motion, useReducedMotion } from "motion/react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -65,17 +64,14 @@ export function Hero() {
               Se menyen
             </a>
             <a
-              href={LINKS.phone}
+              href="#finn-oss"
               className="sign-wide px-7 py-4 text-base"
               style={{ border: "2px solid var(--fg-strong)", color: "var(--fg-strong)" }}
             >
-              Ring og bestill
+              Finn oss
             </a>
           </div>
 
-          <p style={{ color: "var(--fg-mute)" }}>
-            Storgata 61. Inngangen er fra bakgården.
-          </p>
         </div>
 
         {/* One photograph, cropped tall and pulled into the palette, so the

@@ -101,6 +101,13 @@
     color: var(--color-chalk);
   }
 
+  ::placeholder {
+    /* The UA default is a faded copy of the text colour and lands well under
+       4.5:1. Set it explicitly against the surface instead. */
+    color: var(--fg-mute, oklch(0.51 0.014 34));
+    opacity: 1;
+  }
+
   :focus-visible {
     outline: 3px solid var(--mark, var(--color-red));
     outline-offset: 2px;

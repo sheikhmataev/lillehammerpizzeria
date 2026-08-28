@@ -1,10 +1,18 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { MENU, DISH_COUNT, type Dish, type Section } from "@/content/menu";
 import { Motif, type MotifName } from "@/components/Motif";
+import { useEntrance } from "@/lib/use-entrance";
 
-/** A drawn mark per category, so the eye can find a section without reading. */
 const SECTION_MOTIF: Record<string, MotifName> = {
   pizza: "peel",
   italiensk: "peel",
@@ -23,6 +31,8 @@ const SECTION_MOTIF: Record<string, MotifName> = {
   mineralvann: "tea",
 };
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 const norm = (s: string) =>
   s.toLowerCase().replace(/[øö]/g, "o").replace(/[æä]/g, "a").replace(/å/g, "a");
 
@@ -30,6 +40,22 @@ function matches(dish: Dish, q: string) {
   if (!q) return true;
   const hay = norm(`${dish.no ?? ""} ${dish.name} ${dish.desc ?? ""}`);
   return norm(q).split(/\s+/).filter(Boolean).every((t) => hay.includes(t));
+}
+
+/**
+ * People here order by number, and the numbers are grouped: pizza is the 1s
+ * and 2s, the Turkish plates are the 80s, burgers are the 140s and 150s.
+ * Printing each category's range in the rail teaches that system instead of
+ * hiding it, so a regular can jump straight to the right block.
+ */
+function numberRange(s: Section): string | null {
+  const nos = s.dishes.map((d) => d.no).filter(Boolean) as string[];
+  if (nos.length === 0) return null;
+  const numeric = nos.filter((n) => /^\d+$/.test(n)).map(Number);
+  if (numeric.length !== nos.length) return nos.join(" ");
+  const lo = Math.min(...numeric);
+  const hi = Math.max(...numeric);
+  return lo === hi ? `${lo}` : `${lo}–${hi}`;
 }
 
 function Price({ dish }: { dish: Dish }) {
@@ -47,11 +73,26 @@ function Price({ dish }: { dish: Dish }) {
   return <span className="w-14 shrink-0 text-right">{dish.price}</span>;
 }
 
-function Row({ dish }: { dish: Dish }) {
+function Row({
+  dish,
+  index,
+  animate,
+}: {
+  dish: Dish;
+  index: number;
+  animate: boolean;
+}) {
   return (
-    <li
+    <motion.li
       className="grid grid-cols-[3rem_1fr] gap-x-4 py-5"
       style={{ borderTop: "1px solid var(--rule)" }}
+      initial={animate ? { opacity: 0, y: 8 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.28,
+        delay: Math.min(index, 12) * 0.022,
+        ease: EASE,
+      }}
     >
       <span
         className="figure-num pt-0.5 text-2xl"
@@ -62,10 +103,7 @@ function Row({ dish }: { dish: Dish }) {
 
       <div className="min-w-0">
         <div className="flex items-baseline justify-between gap-5">
-          <h3
-            className="sign text-[1.5rem] md:text-[1.75rem]"
-            style={{ color: "var(--fg-strong)" }}
-          >
+          <h3 className="sign text-[1.5rem] md:text-[1.75rem]" style={{ color: "var(--fg-strong)" }}>
             {dish.name}
             {dish.spicy && (
               <span className="tag ml-2.5 align-middle" style={{ color: "var(--mark)" }}>
@@ -94,146 +132,258 @@ function Row({ dish }: { dish: Dish }) {
           </p>
         )}
       </div>
-    </li>
+    </motion.li>
   );
 }
 
-function Block({ section }: { section: Section }) {
+function SizeHeadings({ section }: { section: Section }) {
+  if (!section.sizeHeadings) return null;
   return (
-    <section
-      id={section.id}
-      className="relative scroll-mt-32 break-inside-avoid-column pt-14 first:pt-0"
-    >
-      {/* The drawn marks only read at size, so they are watermarks behind the
-          heading rather than little icons beside it. */}
-      <Motif
-        name={SECTION_MOTIF[section.id] ?? "tea"}
-        size={132}
-        className="pointer-events-none absolute right-0 top-8 opacity-[0.09]"
-      />
-      <div className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <h2 className="display-lg" style={{ color: "var(--fg-strong)" }}>
-          {section.title}
-        </h2>
-        {section.sizeHeadings && (
-          <span className="tag flex gap-5" style={{ color: "var(--fg-mute)" }}>
-            {section.sizeHeadings.map((h) => (
-              <span key={h} className="w-14 text-right">
-                {h}
-              </span>
-            ))}
-          </span>
-        )}
-      </div>
-
-      {section.note && (
-        <p className="mt-3 max-w-[62ch] leading-snug" style={{ color: "var(--fg-mute)" }}>
-          {section.note}
-        </p>
-      )}
-
-      <ul className="mt-4">
-        {section.dishes.map((d) => (
-          <Row key={`${section.id}-${d.no ?? d.name}`} dish={d} />
-        ))}
-      </ul>
-
-      {section.extras && (
-        <dl
-          className="mt-6 grid grid-cols-[1fr_auto] gap-x-8 gap-y-2 p-5"
-          style={{ border: "1px solid var(--rule)", color: "var(--fg-mute)" }}
-        >
-          {section.extras.map((e) => (
-            <div key={e.label} className="contents">
-              <dt>{e.label}</dt>
-              <dd className="figure-num text-right" style={{ color: "var(--fg-strong)" }}>
-                {e.price}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </section>
+    <span className="tag flex gap-5" style={{ color: "var(--fg-mute)" }}>
+      {section.sizeHeadings.map((h) => (
+        <span key={h} className="w-14 text-right">
+          {h}
+        </span>
+      ))}
+    </span>
   );
 }
 
 export function Menu() {
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query);
+  const [active, setActive] = useState(MENU[0].id);
+  const reduce = useReducedMotion();
+  const play = useEntrance();
+  const animate = play && !reduce;
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const chipRow = useRef<HTMLDivElement | null>(null);
 
-  const sections = useMemo(
+  /* Deep links still work: /meny/#tyrkisk opens that category. */
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (id && MENU.some((s) => s.id === id)) setActive(id);
+  }, []);
+
+  const select = useCallback((id: string) => {
+    setActive(id);
+    history.replaceState(null, "", `#${id}`);
+  }, []);
+
+  /* Keep the active chip in view on mobile, otherwise the selection can sit
+     off-screen after a jump from a deep link. */
+  useEffect(() => {
+    const el = chipRow.current?.querySelector<HTMLElement>('[aria-selected="true"]');
+    el?.scrollIntoView({ inline: "center", block: "nearest", behavior: reduce ? "auto" : "smooth" });
+  }, [active, reduce]);
+
+  const hits = useMemo(
     () =>
-      MENU.map((s) => ({ ...s, dishes: s.dishes.filter((d) => matches(d, q)) })).filter(
-        (s) => s.dishes.length > 0,
-      ),
+      MENU.map((s) => ({ ...s, dishes: s.dishes.filter((d) => matches(d, q)) })),
     [q],
   );
-  const shown = sections.reduce((n, s) => n + s.dishes.length, 0);
+  const searching = q.trim().length > 0;
+  const results = hits.filter((s) => s.dishes.length > 0);
+  const total = results.reduce((n, s) => n + s.dishes.length, 0);
+  const current = hits.find((s) => s.id === active) ?? hits[0];
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const i = MENU.findIndex((s) => s.id === active);
+    const step =
+      e.key === "ArrowDown" || e.key === "ArrowRight"
+        ? 1
+        : e.key === "ArrowUp" || e.key === "ArrowLeft"
+          ? -1
+          : e.key === "Home"
+            ? -i
+            : e.key === "End"
+              ? MENU.length - 1 - i
+              : 0;
+    if (!step) return;
+    e.preventDefault();
+    const next = (i + step + MENU.length) % MENU.length;
+    select(MENU[next].id);
+    tabRefs.current[next]?.focus();
+  };
 
   return (
-    <div className="on-chalk min-h-screen">
-      <header className="px-4 pb-8 pt-28 md:px-8 md:pt-36">
-        <div className="mx-auto max-w-[76rem]">
+    <div id="top" className="on-chalk min-h-screen">
+      <header className="px-4 pb-6 pt-28 md:px-8 md:pt-36">
+        <div className="mx-auto max-w-[80rem]">
           <h1 className="display-xl" style={{ color: "var(--fg-strong)" }}>
             Menyen
           </h1>
-          <p className="mt-4 max-w-[46ch] text-xl">
-            Alt vi lager, med nummer og pris. Søk på navn, ingrediens eller
-            nummeret du pleier å bestille.
+          <p className="mt-4 max-w-[44ch] text-lg">
+            Velg en kategori, eller søk hvis du vet hva du vil ha. Numrene er de
+            samme som på papirmenyen.
           </p>
         </div>
       </header>
 
-      <div
-        className="sticky top-0 z-30"
-        style={{ background: "var(--bg)", borderBottom: "1px solid var(--rule)" }}
-      >
-        <div className="mx-auto flex max-w-[76rem] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 md:px-8">
-          <label className="flex min-w-[14rem] flex-1 items-baseline gap-3">
-            <span className="tag shrink-0" style={{ color: "var(--fg-mute)" }}>
-              Søk
-            </span>
+      <div className="mx-auto grid max-w-[80rem] grid-cols-1 gap-0 px-4 pb-28 md:grid-cols-[16rem_minmax(0,1fr)] md:gap-12 md:px-8">
+        {/* Categories. A rail on desktop, a chip row on mobile. Both are the
+            same tablist, so the keyboard behaviour is identical. */}
+        <div
+          className="sticky top-[3.5rem] z-20 -mx-4 h-fit min-w-0 px-4 md:top-24 md:mx-0 md:px-0"
+          style={{ background: "var(--bg)" }}
+        >
+          <label className="flex items-baseline gap-3 pb-1 pt-3">
+            <span className="sr-only">Søk i menyen</span>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="kebab, 25, vegan"
-              className="w-full bg-transparent py-1.5 text-lg outline-none"
-              style={{ color: "var(--fg-strong)", borderBottom: "1px solid var(--rule)" }}
+              placeholder="Søk rett eller nummer"
+              className="w-full bg-transparent pb-2 text-lg outline-none"
+              style={{ color: "var(--fg-strong)", borderBottom: "2px solid var(--rule)" }}
             />
-          </label>
-          <span className="figure-num" style={{ color: "var(--fg-mute)" }}>
-            {shown} / {DISH_COUNT}
-          </span>
-          <nav
-            className="tag flex w-full gap-6 overflow-x-auto pb-1"
-            style={{ scrollbarWidth: "none" }}
-            aria-label="Kategorier"
-          >
-            {MENU.map((s) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                className="shrink-0 whitespace-nowrap"
-                style={{ color: "var(--fg-mute)" }}
+            {searching && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="tag shrink-0"
+                style={{ color: "var(--mark)" }}
               >
-                {s.title}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </div>
+                Tøm
+              </button>
+            )}
+          </label>
 
-      <div className="mx-auto max-w-[76rem] px-4 pb-28 pt-10 md:px-8">
-        {sections.length === 0 ? (
-          <p className="py-20 text-xl">
-            Ingenting het det. Prøv «kebab», «vegan» eller et nummer.
-          </p>
-        ) : (
-          <div className="md:columns-2 md:gap-x-16">
-            {sections.map((s) => (
-              <Block key={s.id} section={s} />
-            ))}
+          <div
+            ref={chipRow}
+            role="tablist"
+            aria-label="Kategorier"
+            aria-orientation="vertical"
+            onKeyDown={onKeyDown}
+            className="flex min-w-0 gap-1 overflow-x-auto py-3 md:flex-col md:overflow-visible"
+            style={{ scrollbarWidth: "none" }}
+          >
+          {MENU.map((s, i) => {
+            const on = s.id === active && !searching;
+            const hitCount = hits[i].dishes.length;
+            const dimmed = searching && hitCount === 0;
+            return (
+              <button
+                key={s.id}
+                ref={(el) => {
+                  tabRefs.current[i] = el;
+                }}
+                role="tab"
+                id={`tab-${s.id}`}
+                aria-selected={on}
+                aria-controls={`panel-${s.id}`}
+                tabIndex={on ? 0 : -1}
+                onClick={() => {
+                  setQuery("");
+                  select(s.id);
+                }}
+                aria-label={`${s.title}, ${searching ? `${hitCount} treff` : (numberRange(s) ?? `${s.dishes.length} retter`)}`}
+                className="relative shrink-0 whitespace-nowrap px-3 py-2.5 text-left md:px-4"
+                style={{ opacity: dimmed ? 0.35 : 1 }}
+              >
+                {on && (
+                  <motion.span
+                    layoutId="rail-active"
+                    className="absolute inset-0 -z-10"
+                    style={{ background: "var(--color-red-deep)" }}
+                    transition={{ duration: reduce ? 0 : 0.32, ease: EASE }}
+                  />
+                )}
+                <span
+                  className="sign block text-base md:text-lg"
+                  style={{ color: on ? "var(--color-chalk)" : "var(--fg-strong)" }}
+                >
+                  {s.title}
+                </span>
+                <span
+                  className="figure-num hidden text-sm md:block"
+                  style={{ color: on ? "oklch(0.86 0.05 28.4)" : "var(--fg-mute)" }}
+                >
+                  {searching ? `${hitCount} treff` : (numberRange(s) ?? `${s.dishes.length} stk`)}
+                </span>
+              </button>
+            );
+          })}
           </div>
+        </div>
+
+        {searching ? (
+          <div className="min-w-0 pt-6 md:pt-0">
+            <p className="tag pb-2" style={{ color: "var(--fg-mute)" }} aria-live="polite">
+              {total} av {DISH_COUNT} retter
+            </p>
+            {results.length === 0 ? (
+              <p className="max-w-[40ch] py-16 text-xl">
+                Ingenting het det. Prøv «kebab», «vegan» eller et nummer, for
+                eksempel 25.
+              </p>
+            ) : (
+              results.map((s) => (
+                <section key={s.id} className="pt-10 first:pt-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                    <h2 className="sign text-2xl" style={{ color: "var(--fg-strong)" }}>
+                      {s.title}
+                    </h2>
+                    <SizeHeadings section={s} />
+                  </div>
+                  <ul className="mt-3">
+                    {s.dishes.map((d, i) => (
+                      <Row key={d.no ?? d.name} dish={d} index={i} animate={false} />
+                    ))}
+                  </ul>
+                </section>
+              ))
+            )}
+          </div>
+        ) : (
+          <section
+            key={active}
+            role="tabpanel"
+            id={`panel-${active}`}
+            aria-labelledby={`tab-${active}`}
+            tabIndex={-1}
+            className="relative min-w-0 pt-6 md:pt-0"
+          >
+            <Motif
+              name={SECTION_MOTIF[current.id] ?? "tea"}
+              size={200}
+              className="pointer-events-none absolute -top-6 right-0 opacity-[0.08]"
+            />
+
+            <div className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h2 className="display-lg" style={{ color: "var(--fg-strong)" }}>
+                {current.title}
+              </h2>
+              <SizeHeadings section={current} />
+            </div>
+
+            {current.note && (
+              <p className="relative mt-3 max-w-[62ch] leading-snug" style={{ color: "var(--fg-mute)" }}>
+                {current.note}
+              </p>
+            )}
+
+            <ul className="relative mt-5">
+              {current.dishes.map((d, i) => (
+                <Row key={d.no ?? d.name} dish={d} index={i} animate={animate} />
+              ))}
+            </ul>
+
+            {current.extras && (
+              <dl
+                className="mt-8 grid max-w-[34rem] grid-cols-[1fr_auto] gap-x-8 gap-y-2 p-5"
+                style={{ border: "1px solid var(--rule)", color: "var(--fg-mute)" }}
+              >
+                {current.extras.map((e) => (
+                  <div key={e.label} className="contents">
+                    <dt>{e.label}</dt>
+                    <dd className="figure-num text-right" style={{ color: "var(--fg-strong)" }}>
+                      {e.price}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </section>
         )}
       </div>
     </div>
