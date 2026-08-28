@@ -89,7 +89,7 @@ export function Nav({ pinned = false }: { pinned?: boolean }) {
             className="sign-wide px-4 py-2.5 text-sm md:px-5"
             style={{ background: "var(--color-red)", color: "var(--color-chalk)" }}
           >
-            Ring {LINKS.phoneLabel}
+            Ring<span className="hidden sm:inline"> {LINKS.phoneLabel}</span>
           </a>
         </nav>
       </div>
