@@ -1,24 +1,22 @@
-import { Header } from "@/components/Header";
+import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
-import { Rating } from "@/components/Rating";
-import { Stack } from "@/components/Stack";
-import { Menu } from "@/components/Menu";
+import { Favorites } from "@/components/Favorites";
+import { PhotoRail } from "@/components/PhotoRail";
+import { Room } from "@/components/Room";
 import { Discounts } from "@/components/Discounts";
-import { About } from "@/components/About";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 
 export default function Home() {
   return (
     <>
-      <Header />
+      <Nav />
       <main>
         <Hero />
-        <Rating />
-        <Stack />
-        <Menu />
+        <Favorites />
+        <PhotoRail />
+        <Room />
         <Discounts />
-        <About />
         <Contact />
       </main>
       <Footer />

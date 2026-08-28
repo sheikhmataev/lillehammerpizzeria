@@ -1,58 +1,71 @@
 @import "tailwindcss";
 
-/* ---------------------------------------------------------------
-   Lillehammer Restaurant & Bar — design tokens
-   Every colour is sampled from the restaurant's own logo and photos.
-   --------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   LILLEHAMMER RESTAURANT & BAR
+
+   Colour strategy: committed. Red is not an accent here, it carries whole
+   surfaces. The reference is a painted enamel sign, not a cream menu card.
+
+   The red is the restaurant's own, sampled from the crossed fork and knife in
+   the logo. Everything else is built around it: the near-black is the logo's
+   own ground, and the off-white is tinted toward the red hue rather than
+   toward beige, so the page never drifts into the cream-and-terracotta look
+   every other restaurant site has landed on.
+   --------------------------------------------------------------------------- */
 @theme {
-  --color-ember: #e81820;
-  --color-ember-deep: #8c0f16;
+  /* Brand red, exact: #E81820 from the logo mark. */
+  --color-red: oklch(0.5716 0.2231 28.4);
+  /* Darkened for surfaces that must carry small text at 4.5:1. */
+  --color-red-deep: oklch(0.4245 0.1652 28.4);
+  --color-red-dark: oklch(0.2795 0.1085 28.4);
 
-  --color-ink: #080808;
-  --color-carbon: #231f20;
+  --color-ink: oklch(0.1867 0.0155 34);
+  --color-soot: oklch(0.2926 0.0138 34);
 
-  --color-sage: #90a8a0;
-  --color-petrol: #204050;
-  --color-petrol-deep: #132631;
+  /* Off-white, chroma pulled toward the brand hue. Not a beige. */
+  --color-chalk: oklch(0.9668 0.0075 28.4);
+  --color-chalk-2: oklch(0.9182 0.0102 28.4);
+  --color-chalk-3: oklch(0.8188 0.0128 28.4);
 
-  --color-amber: #d86800;
-  --color-bone: #dcceb8;
-  --color-ash: #8a8f92;
-
-  --font-display: var(--font-archivo), "Arial Narrow", sans-serif;
-  --font-body: var(--font-instrument), system-ui, sans-serif;
-  --font-mono: var(--font-martian), ui-monospace, monospace;
+  --font-display: var(--font-bricolage), "Helvetica Neue", sans-serif;
+  --font-body: var(--font-vollkorn), Georgia, serif;
 }
 
-/* HEAT: the site is themed by the real clock in Lillehammer.
-   cold = kitchen closed, warm = kitchen open. Set on <html> before paint. */
-:root,
-[data-heat="cold"] {
-  --surface: #0f2028;
-  --surface-2: #16303b;
-  --edge: #2b4c5b;
-  --edge-soft: #1e3a46;
-  --fg: #c2d4da;
-  --fg-strong: #f2f8fa;
-  --fg-mute: #8ba3ac;
-  --accent: var(--color-sage);
-  --photo-filter: saturate(0.6) contrast(1.03) brightness(0.9);
-  --ease-house: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur: 1100ms;
+/* --------------------------------------------------------------------------
+   Surfaces. Sections opt into one of these; the page alternates between them
+   rather than running one ground the whole way down.
+   -------------------------------------------------------------------------- */
+.on-ink {
+  --bg: var(--color-ink);
+  --fg: oklch(0.8683 0.0138 34);
+  --fg-strong: var(--color-chalk);
+  --fg-mute: oklch(0.6604 0.0138 34);
+  --rule: var(--color-soot);
+  --mark: var(--color-red);
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
-[data-heat="warm"] {
-  --surface: #0b0a0a;
-  --surface-2: #191616;
-  --edge: #3d3330;
-  --edge-soft: #241e1c;
-  --fg: #d3c7ba;
-  --fg-strong: #f8f2e9;
-  --fg-mute: #9d8f83;
-  --accent: var(--color-ember);
-  --photo-filter: saturate(1.06) contrast(1.02) brightness(1);
-  --ease-house: cubic-bezier(0.2, 0.9, 0.1, 1);
-  --dur: 380ms;
+.on-red {
+  --bg: var(--color-red-deep);
+  --fg: oklch(0.9182 0.0332 28.4);
+  --fg-strong: var(--color-chalk);
+  --fg-mute: oklch(0.8188 0.0498 28.4);
+  --rule: oklch(0.5219 0.1735 28.4);
+  --mark: var(--color-chalk);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.on-chalk {
+  --bg: var(--color-chalk);
+  --fg: oklch(0.3428 0.0138 34);
+  --fg-strong: var(--color-ink);
+  --fg-mute: oklch(0.5108 0.0138 34);
+  --rule: var(--color-chalk-3);
+  --mark: var(--color-red-deep);
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 @layer base {
@@ -61,132 +74,151 @@
   }
 
   html {
-    background-color: var(--surface);
+    background-color: var(--color-ink);
     color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
-    scroll-behavior: smooth;
   }
 
   body {
-    background-color: var(--surface);
-    color: var(--fg);
     font-family: var(--font-body);
-    font-size: 17px;
-    line-height: 1.55;
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    background-color: var(--color-ink);
+    color: var(--color-chalk);
     overflow-x: clip;
-    /* No transition on themed properties: Chrome will not advance a
-       transition whose value comes from a custom property that changed,
-       so the colour would stay pinned to the old palette. The temperature
-       is resolved before first paint anyway. */
+    text-rendering: optimizeLegibility;
   }
 
   @media (min-width: 768px) {
-    body {
-      font-size: 18px;
-    }
+    body { font-size: 1.125rem; }
   }
 
-  h1, h2, h3 {
-    text-wrap: balance;
-  }
-
-  p {
-    text-wrap: pretty;
-  }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
 
   ::selection {
-    background: var(--accent);
-    color: var(--surface);
+    background: var(--color-red);
+    color: var(--color-chalk);
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-  }
-
-  img {
-    filter: var(--photo-filter);
+    outline: 3px solid var(--mark, var(--color-red));
+    outline-offset: 2px;
   }
 }
 
-@utility hairline-t {
-  border-top: 1px solid var(--edge-soft);
-}
-@utility hairline-b {
-  border-bottom: 1px solid var(--edge-soft);
-}
-
-/* LABEL: interface furniture. Sans, not mono, so it stays readable at
-   small sizes. Mono is reserved for things that are actually data. */
-@utility label {
-  font-family: var(--font-body);
-  font-size: 0.8125rem;
-  letter-spacing: 0.075em;
+/* --------------------------------------------------------------------------
+   Type. Two families on a real contrast axis: a vernacular grotesque with
+   width and optical-size axes for anything that behaves like signage, and a
+   sturdy bookish serif for anything anyone actually reads. No monospace: this
+   is a grill house, not a terminal.
+   -------------------------------------------------------------------------- */
+@utility sign {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: "wdth" 90;
+  letter-spacing: -0.025em;
+  line-height: 0.92;
   text-transform: uppercase;
-  font-weight: 500;
-  line-height: 1.2;
 }
 
-/* LED: numerals only. Clock, prices, counts. */
-@utility led {
-  font-family: var(--font-mono);
-  font-variation-settings: "wdth" 87.5;
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
+@utility sign-wide {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variation-settings: "wdth" 110;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* Short interface labels only. Never a sentence. */
+@utility tag {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+/* Dish numbers, prices, clock. Tabular so columns line up. */
+@utility figure-num {
+  font-family: var(--font-display);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-@utility type-condensed {
+@utility display-xl {
   font-family: var(--font-display);
-  font-stretch: 82%;
-  font-weight: 700;
-  letter-spacing: 0.002em;
-  line-height: 1.02;
+  font-weight: 800;
+  font-variation-settings: "wdth" 88;
   text-transform: uppercase;
+  letter-spacing: -0.035em;
+  line-height: 0.86;
+  font-size: clamp(2.75rem, 9vw, 6rem);
 }
 
-@utility type-expanded {
+@utility display-lg {
   font-family: var(--font-display);
-  font-stretch: 112%;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 0.95;
-}
-
-/* Section heading used across the page. */
-@utility section-title {
-  font-family: var(--font-display);
-  font-stretch: 112%;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 0.95;
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  font-variation-settings: "wdth" 92;
   text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  font-size: clamp(2rem, 5.2vw, 3.75rem);
 }
 
-@keyframes pilot {
+/* --------------------------------------------------------------------------
+   Motifs. Drawn once, recoloured everywhere: the SVG is used as a mask so a
+   single file works on red, on ink and on chalk without a second asset.
+   -------------------------------------------------------------------------- */
+@utility motif {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+@keyframes flicker {
+  0%, 32%   { mask-image: url("/motifs/flame-1.svg"); -webkit-mask-image: url("/motifs/flame-1.svg"); }
+  33%, 65%  { mask-image: url("/motifs/flame-3.svg"); -webkit-mask-image: url("/motifs/flame-3.svg"); }
+  66%, 100% { mask-image: url("/motifs/flame-2.svg"); -webkit-mask-image: url("/motifs/flame-2.svg"); }
+}
+
+/* Three drawn frames cycled on a deliberately uneven beat, so it reads as a
+   flame catching rather than a looping GIF. */
+@utility flame {
+  animation: flicker 0.62s steps(1, end) infinite;
+}
+
+@keyframes ember-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+  50% { opacity: 0.3; }
 }
-@utility pilot-light {
-  animation: pilot 2.4s var(--ease-house) infinite;
-}
-
-@keyframes breathe {
-  0%, 100% { transform: scale(1.04) translate3d(0, 0, 0); opacity: 0.9; }
-  50% { transform: scale(1.09) translate3d(0, -1.2%, 0); opacity: 1; }
-}
-@utility breathing {
-  animation: breathe 22s ease-in-out infinite;
-  will-change: transform, opacity;
+@utility ember-dot {
+  animation: ember-pulse 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+  .flame {
+    mask-image: url("/motifs/flame-2.svg");
+    -webkit-mask-image: url("/motifs/flame-2.svg");
+  }
 }
+
+/* The photo rail runs on its own. Duplicated content means the reset at 50%
+   is invisible; hovering pauses it so a photograph can be looked at. */
+@keyframes rail {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.rail-track:hover,
+.rail-track:focus-within { animation-play-state: paused; }

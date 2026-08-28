@@ -1,27 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Instrument_Sans, Martian_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Vollkorn } from "next/font/google";
 import { HeatProvider } from "@/components/HeatProvider";
 import { HEAT_BOOT } from "@/components/heat-boot";
 import { FastPath } from "@/components/FastPath";
 import "./globals.css";
 
-const archivo = Archivo({
+/* Bricolage carries anything that behaves like signage. A vernacular grotesque
+   with width and optical-size axes, drawn with deliberate irregularities, which
+   suits a 23-year-old family grill house better than a neutral corporate sans. */
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin", "latin-ext"],
-  axes: ["wdth"],
-  variable: "--font-archivo",
+  axes: ["wdth", "opsz"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
-const instrument = Instrument_Sans({
+/* Vollkorn ("wholemeal") carries everything anyone actually reads. Sturdy and
+   warm, and closer to the serif on the restaurant's own printed menu than any
+   sans would be. */
+const vollkorn = Vollkorn({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-instrument",
-  display: "swap",
-});
-
-const martian = Martian_Mono({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  variable: "--font-martian",
+  style: ["normal", "italic"],
+  variable: "--font-vollkorn",
   display: "swap",
 });
 
@@ -44,10 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#080808" },
-    { media: "(prefers-color-scheme: light)", color: "#080808" },
-  ],
+  themeColor: "#231f20",
 };
 
 /* Local search is the single highest-value thing on a restaurant site.
@@ -100,7 +97,7 @@ export default function RootLayout({
     <html
       lang="no"
       data-heat="warm"
-      className={`${archivo.variable} ${instrument.variable} ${martian.variable}`}
+      className={`${bricolage.variable} ${vollkorn.variable}`}
       suppressHydrationWarning
     >
       <head>
