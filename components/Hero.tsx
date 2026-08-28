@@ -23,7 +23,7 @@ export function Hero() {
     : `Åpner ${DAY_NO[nextDay]} ${hhmm(HOURS[nextDay].open)}.`;
 
   return (
-    <section className="on-red relative isolate overflow-hidden md:min-h-svh">
+    <section id="top" className="on-red relative isolate overflow-hidden md:min-h-svh">
       {/* Paper grain, multiplied, so the red reads as painted rather than
           filled. Barely visible on its own; it is what stops a flat #A8 red
           looking like a CSS background. */}
