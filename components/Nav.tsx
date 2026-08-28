@@ -1,26 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useHeat } from "@/components/HeatProvider";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Logo } from "@/components/Logo";
-import { HOURS, DAY_NO, humanGap } from "@/lib/hours";
 import { LINKS } from "@/lib/links";
 import { asset } from "@/lib/asset";
 
-const hhmm = (m: number) =>
-  `${String(Math.floor(m / 60)).padStart(2, "0")}.${String(m % 60).padStart(2, "0")}`;
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+/* Two destinations in the bar, four in the drawer. The anchors resolve on the
+   home page, so from the menu page they carry the visitor back to it. */
+const PRIMARY = [
+  { href: "/meny/", label: "Meny" },
+  { href: "/#finn-oss", label: "Finn oss" },
+];
+
+const DRAWER = [
+  ...PRIMARY,
+  { href: "/#om-oss", label: "Om oss" },
+  { href: "/#rabatt", label: "Rabatt" },
+];
 
 /**
- * Three destinations, not five. The mark sits top left where a restaurant's
- * sign sits, the links are the only navigation, and the phone number is the
- * one thing that looks like a button.
+ * The mark, the destinations, and the phone number. Nothing else: the bar used
+ * to carry a live open/closed readout, which competed with the navigation for
+ * the same glance and told people the one thing they cannot act on.
  *
- * The status never says the place is shut. Closed is not information anyone
- * can act on; the next opening is, so that is what it says instead.
+ * Below the sm breakpoint the destinations collapse into a drawer, so the bar
+ * is the mark, the phone number and a way in. The phone number never collapses,
+ * because on a phone it is the whole point.
  */
 export function Nav({ pinned = false }: { pinned?: boolean }) {
-  const { heat, day, minutes, toClose, toOpen, mounted } = useHeat();
+  const reduce = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const header = useRef<HTMLElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -29,28 +44,38 @@ export function Nav({ pinned = false }: { pinned?: boolean }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const open = heat === "warm";
-  const nextDay = toOpen !== null && minutes + toOpen >= 1440 ? (day + 1) % 7 : day;
-  const status = open
-    ? toClose !== null && toClose <= 60
-      ? `Stenger om ${humanGap(toClose)}`
-      : `Åpent til ${hhmm(HOURS[day].close)}`
-    : toOpen !== null && toOpen <= 120
-      ? `Åpner om ${humanGap(toOpen)}`
-      : `Åpner ${DAY_NO[nextDay]} ${hhmm(HOURS[nextDay].open)}`;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggle.current?.focus();
+      }
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!header.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [open]);
 
-  const solid = pinned || scrolled;
+  const solid = pinned || scrolled || open;
 
   return (
     <header
+      ref={header}
       className="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
       style={{
         background: solid
           ? "var(--color-ink)"
-          : /* a scrim, so the mark survives whatever photograph is behind it
-               at the top of the page */
-            /* to a zero-alpha copy of the same colour, not `transparent`:
-               interpolating toward transparent black leaves a grey edge */
+          : /* a scrim, so the mark survives whatever photograph is behind it at
+               the top of the page. To a zero-alpha copy of the same colour,
+               not `transparent`: interpolating toward transparent black leaves
+               a grey edge. */
             "linear-gradient(to bottom, oklch(0.19 0.015 34 / 0.72), oklch(0.19 0.015 34 / 0))",
         borderBottom: `1px solid ${solid ? "var(--color-soot)" : "transparent"}`,
       }}
@@ -69,33 +94,18 @@ export function Nav({ pinned = false }: { pinned?: boolean }) {
           </span>
         </a>
 
-        <span
-          className="hidden items-center gap-2 sm:flex"
-          style={{ color: open ? "var(--color-chalk)" : "oklch(0.72 0.014 34)" }}
-        >
-          <span
-            className="ember-dot inline-block size-2"
-            style={{ background: open ? "var(--color-red)" : "oklch(0.55 0.01 34)" }}
-            aria-hidden
-          />
-          <span className={`tag ${mounted ? "" : "opacity-0"}`}>{status}</span>
-        </span>
-
         <nav className="ml-auto flex items-center gap-5 md:gap-7">
-          <a
-            href={asset("/meny/")}
-            className="tag hidden sm:inline"
-            style={{ color: "var(--color-chalk)" }}
-          >
-            Meny
-          </a>
-          <a
-            href={asset("/#finn-oss")}
-            className="tag hidden sm:inline"
-            style={{ color: "var(--color-chalk)" }}
-          >
-            Finn oss
-          </a>
+          {PRIMARY.map((l) => (
+            <a
+              key={l.href}
+              href={asset(l.href)}
+              className="tag hidden sm:inline"
+              style={{ color: "var(--color-chalk)" }}
+            >
+              {l.label}
+            </a>
+          ))}
+
           <a
             href={LINKS.phone}
             className="sign-wide px-4 py-2.5 text-sm md:px-5"
@@ -103,8 +113,72 @@ export function Nav({ pinned = false }: { pinned?: boolean }) {
           >
             Ring<span className="hidden sm:inline"> {LINKS.phoneLabel}</span>
           </a>
+
+          <button
+            ref={toggle}
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="nav-drawer"
+            aria-label={open ? "Lukk menyen" : "Åpne menyen"}
+            className="-mr-1 flex size-10 shrink-0 flex-col items-center justify-center gap-[5px] sm:hidden"
+          >
+            {/* two rules that cross into an x, so the control says what it does
+                in both states without a second icon */}
+            <motion.span
+              className="block h-[2px] w-6 origin-center"
+              style={{ background: "var(--color-chalk)" }}
+              animate={{ rotate: open ? 45 : 0, y: open ? 3.5 : 0 }}
+              transition={{ duration: reduce ? 0 : 0.28, ease: EASE }}
+            />
+            <motion.span
+              className="block h-[2px] w-6 origin-center"
+              style={{ background: "var(--color-chalk)" }}
+              animate={{ rotate: open ? -45 : 0, y: open ? -3.5 : 0 }}
+              transition={{ duration: reduce ? 0 : 0.28, ease: EASE }}
+            />
+          </button>
         </nav>
       </div>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            id="nav-drawer"
+            className="overflow-hidden sm:hidden"
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={{ duration: reduce ? 0 : 0.36, ease: EASE }}
+            style={{ borderTop: "1px solid var(--color-soot)" }}
+          >
+            <nav className="px-4 pb-3 pt-1" aria-label="Sider">
+              {DRAWER.map((l, i) => (
+                <motion.a
+                  key={l.href}
+                  href={asset(l.href)}
+                  onClick={() => setOpen(false)}
+                  className="sign block py-3 text-2xl"
+                  style={{
+                    color: "var(--color-chalk)",
+                    borderBottom:
+                      i < DRAWER.length - 1 ? "1px solid var(--color-soot)" : "none",
+                  }}
+                  initial={reduce ? false : { opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: reduce ? 0 : 0.34,
+                    ease: EASE,
+                    delay: reduce ? 0 : 0.06 + i * 0.045,
+                  }}
+                >
+                  {l.label}
+                </motion.a>
+              ))}
+            </nav>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </header>
   );
 }

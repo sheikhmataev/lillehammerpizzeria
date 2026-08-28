@@ -10,7 +10,7 @@ import { MashCredit } from "@/components/MashCredit";
 export function Footer() {
   return (
     <footer
-      className="on-ink px-4 pb-28 pt-8 md:px-8 md:pb-10"
+      className="on-ink px-4 pb-10 pt-8 md:px-8"
       style={{ borderTop: "1px solid var(--rule)" }}
     >
       <div className="mx-auto flex max-w-[80rem] flex-wrap items-center justify-between gap-x-8 gap-y-4">

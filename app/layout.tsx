@@ -3,7 +3,6 @@ import { Bricolage_Grotesque, Vollkorn } from "next/font/google";
 import { HeatProvider } from "@/components/HeatProvider";
 import { HEAT_BOOT } from "@/components/heat-boot";
 import { BASE } from "@/lib/asset";
-import { FastPath } from "@/components/FastPath";
 import "./globals.css";
 
 /* Bricolage carries anything that behaves like signage. A vernacular grotesque
@@ -118,10 +117,7 @@ export default function RootLayout({
         ) : null}
       </head>
       <body className="antialiased">
-        <HeatProvider>
-          {children}
-          <FastPath />
-        </HeatProvider>
+        <HeatProvider>{children}</HeatProvider>
       </body>
     </html>
   );

@@ -220,7 +220,7 @@ export function Menu() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[80rem] grid-cols-1 gap-0 px-4 pb-28 md:grid-cols-[16rem_minmax(0,1fr)] md:gap-12 md:px-8">
+      <div className="mx-auto grid max-w-[80rem] grid-cols-1 gap-0 px-4 pb-16 md:grid-cols-[16rem_minmax(0,1fr)] md:gap-12 md:px-8">
         {/* Categories. A rail on desktop, a chip row on mobile. Both are the
             same tablist, so the keyboard behaviour is identical. */}
         <div
